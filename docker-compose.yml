@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: bookstore
+      POSTGRES_USER: bookstore
+      POSTGRES_PASSWORD: bookstore
+    ports:
+      - "5432:5432"
+    volumes:
+      - rbdip_pgdata:/var/lib/postgresql/data
+
+volumes:
+  rbdip_pgdata:

@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch: {}
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      # Docker уже установлен на GitHub-hosted раннерах - Testcontainers
+      # поднимает PostgreSQL сам, отдельный service-контейнер не нужен.
+
+      - name: Собрать и прогнать проверки (checkstyle, pmd, tests, jacoco)
+        run: mvn -B verify
+        continue-on-error: true
+
+      - name: Mutation testing (PIT)
+        run: mvn -B org.pitest:pitest-maven:mutationCoverage
+        continue-on-error: true
+
+      - name: Сформировать score.json
+        run: python3 scripts/write_score.py
+
+      - name: Опубликовать артефакт score
+        uses: actions/upload-artifact@v4
+        with:
+          name: score
+          path: score.json
+
+      - name: Опубликовать отчёты (для отладки)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+            target/pit-reports/
+            target/checkstyle-result.xml
+            target/pmd.xml
+          if-no-files-found: ignore

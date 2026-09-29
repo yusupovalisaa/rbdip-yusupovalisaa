@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: rbdip-bookstore
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/bookstore}
+    username: ${SPRING_DATASOURCE_USERNAME:bookstore}
+    password: ${SPRING_DATASOURCE_PASSWORD:bookstore}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        generate_statistics: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+server:
+  port: 8080
