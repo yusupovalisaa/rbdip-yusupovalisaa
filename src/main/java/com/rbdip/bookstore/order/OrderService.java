@@ -47,9 +47,8 @@ public class OrderService {
         BigDecimal total = pricingCalculator.calculateOrderTotal(
                 lineItems, request.customerType() == null ? "regular" : request.customerType(), request.couponCode());
 
-        Order order = new Order(
-                request.customerFullName(), request.customerAddress(), request.customerPhone(), "new");
-        order = persistenceService.saveOrder(order, orderLines);
+        Order order = persistenceService.saveOrder(
+            request.customerFullName(), request.customerAddress(), request.customerPhone(), orderLines);
         confirmationNotifier.sendOrderConfirmation(order, total);
 
         return order;
