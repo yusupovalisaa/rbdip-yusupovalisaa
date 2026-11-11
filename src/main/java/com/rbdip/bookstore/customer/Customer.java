@@ -15,8 +15,11 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
     private String address;
 
@@ -27,7 +30,14 @@ public class Customer {
     }
 
     public Customer(String fullName, String address, String phone) {
-        this.fullName = fullName;
+        int separator = fullName.indexOf(' ');
+        if (separator >= 0 && separator < fullName.length() - 1) {
+            firstName = fullName.substring(0, separator);
+            lastName = fullName.substring(separator + 1);
+        } else {
+            firstName = fullName;
+            lastName = "";
+        }
         this.address = address;
         this.phone = phone;
     }
@@ -37,7 +47,15 @@ public class Customer {
     }
 
     public String getFullName() {
-        return fullName;
+        return lastName.isEmpty() ? firstName : firstName + " " + lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public String getAddress() {

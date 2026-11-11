@@ -22,6 +22,18 @@ ALTER TABLE orders ALTER COLUMN customer_id SET NOT NULL;
 ALTER TABLE orders
     ADD CONSTRAINT fk_orders_customer FOREIGN KEY (customer_id) REFERENCES customers(id);
 
+-- Readers of the V1 order schema still use customer_full_name until contract.
+CREATE FUNCTION fill_order_customer_full_name() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+    SELECT full_name INTO NEW.customer_full_name FROM customers WHERE id = NEW.customer_id;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER fill_order_customer_full_name
+    BEFORE INSERT OR UPDATE OF customer_id ON orders
+    FOR EACH ROW EXECUTE FUNCTION fill_order_customer_full_name();
+
 ALTER TABLE order_items ADD COLUMN product_id BIGINT;
 
 -- V1 did not retain product IDs, so preserve unmatched historical snapshots as products.
@@ -48,7 +60,6 @@ ALTER TABLE order_items
     ADD CONSTRAINT fk_order_items_product FOREIGN KEY (product_id) REFERENCES products(id);
 
 ALTER TABLE orders
-    DROP COLUMN customer_full_name,
     DROP COLUMN customer_address,
     DROP COLUMN customer_phone;
 

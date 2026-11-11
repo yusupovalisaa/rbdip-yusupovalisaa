@@ -23,10 +23,10 @@ public class OrderPersistenceService {
 
     public Order saveOrder(
             String customerFullName, String customerAddress, String customerPhone, List<OrderLine> orderLines) {
-        Customer customer = customerRepository.findByFullNameAndAddressAndPhone(
-                        customerFullName, customerAddress, customerPhone)
-                .orElseGet(() -> customerRepository.save(
-                        new Customer(customerFullName, customerAddress, customerPhone)));
+        Customer newCustomer = new Customer(customerFullName, customerAddress, customerPhone);
+        Customer customer = customerRepository.findByFirstNameAndLastNameAndAddressAndPhone(
+                        newCustomer.getFirstName(), newCustomer.getLastName(), customerAddress, customerPhone)
+                .orElseGet(() -> customerRepository.save(newCustomer));
         Order savedOrder = orderRepository.save(new Order(customer, "new"));
         for (OrderLine orderLine : orderLines) {
             int quantity = orderLine.quantity();
